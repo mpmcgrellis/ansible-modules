@@ -27,7 +27,7 @@ module: win_subversion
 version_added: "2.0"
 short_description: Deploys a subversion repository.
 description:
-  - Deploy given repository URL / revision to dest. If dest exists, update to the specified revision, otherwise perform a checkout.  Like the M(subversion) module, but for Windows.
+  - Deploy given repository URL / revision to C(dest). If C(dest) exists, update to the specified C(revision), otherwise perform a checkout.  Like the M(subversion) module, but for Windows.
 author: "Mick McGrellis <mpmcgrellis@gmail.com>"
 note:
   - Requires I(svn) to be installed on the client.  You can use M(win_chocolatey) to do that.
