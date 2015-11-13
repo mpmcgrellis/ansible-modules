@@ -1,0 +1,242 @@
+---
+# Testing win_subversion module
+
+- name: "testing win_subversion"
+  hosts: '{{ target_machine }}'
+  gather_facts: no
+
+  vars:
+    test_repo: TODO-enter repo URL to use for testing
+    svn_username: TODO-username to use to connect to svn repo
+    svn_password: TODO-password to use to connect to sv repo
+    old_revision: TODO-old revision to which to downgrade
+    remove_path: TODO-path in working directory to delete for testing revert
+
+  #vars_files:
+
+  #pre_tasks:
+
+  #roles:
+    #- speech-resource-server
+
+  tasks:
+
+  - name: reset
+    win_file:
+      path: C:\win_subversion_test
+      state: absent
+
+  - name: reset 2
+    win_file:
+      path: C:\win_subversion_test\
+      state: directory
+
+  - name: reset 3
+    win_file:
+      path: C:\win_subversion_test\file
+      state: touch
+
+
+
+  - name: Alternate executable
+    win_subversion:
+      repo: "{{ test_repo }}"
+      revision: HEAD
+      dest: C:\win_subversion_test\altexec
+      username: "{{ svn_username }}"
+      password: "{{ svn_password }}"
+      export: no
+      force: no
+      executable: "& 'C:\\Program Files (x86)\\Subversion\\bin\\svn.exe'"
+
+  - name: Standard export
+    win_subversion:
+      repo: "{{ test_repo }}"
+      revision: HEAD
+      dest: C:\win_subversion_test\export
+      username: "{{ svn_username }}"
+      password: "{{ svn_password }}"
+      export: yes
+      force: no
+
+  - name: Export on existing (should fail)
+    win_subversion:
+      repo: "{{ test_repo }}"
+      revision: HEAD
+      dest: C:\win_subversion_test\export
+      username: "{{ svn_username }}"
+      password: "{{ svn_password }}"
+      export: yes
+      force: no
+    ignore_errors: yes
+
+  - name: Force export on existing
+    win_subversion:
+      repo: "{{ test_repo }}"
+      revision: HEAD
+      dest: C:\win_subversion_test\export
+      username: "{{ svn_username }}"
+      password: "{{ svn_password }}"
+      export: yes
+      force: yes
+
+
+
+  - name: Checkout on existing (should fail)
+    win_subversion:
+      repo: "{{ test_repo }}"
+      revision: HEAD
+      dest: C:\win_subversion_test\export
+      username: "{{ svn_username }}"
+      password: "{{ svn_password }}"
+      export: no
+      force: no
+    ignore_errors: yes
+
+# current module does not support this 
+  - name: Force checkout on existing (not supported)
+    win_subversion:
+      repo: "{{ test_repo }}"
+      revision: HEAD
+      dest: C:\win_subversion_test\export
+      username: "{{ svn_username }}"
+      password: "{{ svn_password }}"
+      export: no
+      force: yes
+    ignore_errors: yes
+
+
+  - name: Standard checkout
+    win_subversion:
+      repo: "{{ test_repo }}"
+      revision: HEAD
+      dest: C:\win_subversion_test\checkout
+      username: "{{ svn_username }}"
+      password: "{{ svn_password }}"
+      export: no
+      force: no
+
+  - name: Repeat checkout
+    win_subversion:
+      repo: "{{ test_repo }}"
+      revision: HEAD
+      dest: C:\win_subversion_test\checkout
+      username: "{{ svn_username }}"
+      password: "{{ svn_password }}"
+      export: no
+      force: no
+
+  - name: Downgrade checkout
+    win_subversion:
+      repo: "{{ test_repo }}"
+      revision: "{{ old_revision }}"
+      dest: C:\win_subversion_test\checkout
+      username: "{{ svn_username }}"
+      password: "{{ svn_password }}"
+      export: no
+      force: no
+
+  - name: Upgrade checkout
+    win_subversion:
+      repo: "{{ test_repo }}"
+      revision: HEAD
+      dest: C:\win_subversion_test\checkout
+      username: "{{ svn_username }}"
+      password: "{{ svn_password }}"
+      export: no
+      force: no
+
+  - name: File in way checkout (should fail)
+    win_subversion:
+      repo: "{{ test_repo }}"
+      revision: HEAD
+      dest: C:\win_subversion_test\file
+      username: "{{ svn_username }}"
+      password: "{{ svn_password }}"
+      export: no
+      force: no
+    ignore_errors: yes
+
+  - name: File in way export (should fail)
+    win_subversion:
+      repo: "{{ test_repo }}"
+      revision: HEAD
+      dest: C:\win_subversion_test\file
+      username: "{{ svn_username }}"
+      password: "{{ svn_password }}"
+      export: yes
+      force: no
+    ignore_errors: yes
+
+  - name: Force File in way export (should fail)
+    win_subversion:
+      repo: "{{ test_repo }}"
+      revision: HEAD
+      dest: C:\win_subversion_test\file
+      username: "{{ svn_username }}"
+      password: "{{ svn_password }}"
+      export: yes
+      force: yes
+    ignore_errors: yes
+
+  - name: Checkout using name and version alias options
+    win_subversion:
+      name: "{{ test_repo }}"
+      version: HEAD
+      dest: C:\win_subversion_test\name-alias
+      username: "{{ svn_username }}"
+      password: "{{ svn_password }}"
+      export: no
+      force: no
+
+  - name: Checkout using repository and version alias options
+    win_subversion:
+      repository: "{{ test_repo }}"
+      version: HEAD
+      dest: C:\win_subversion_test\repository-alias
+      username: "{{ svn_username }}"
+      password: "{{ svn_password }}"
+      export: no
+      force: no
+
+  - name: Switch
+    win_subversion:
+      repo: "{{ test_repo }}"
+      switch: yes
+      revision: HEAD
+      dest: C:\win_subversion_test\repository-alias
+      username: "{{ svn_username }}"
+      password: "{{ svn_password }}"
+      export: no
+      force: no
+
+  - name: Edit
+    win_file:
+      path: "{{ remove_path }}"
+      state: absent
+
+  - name: Revert (should fail)
+    win_subversion:
+      repo: "{{ test_repo }}"
+      revision: HEAD
+      dest: C:\win_subversion_test\repository-alias
+      username: "{{ svn_username }}"
+      password: "{{ svn_password }}"
+      export: no
+      force: no
+    ignore_errors: yes
+
+  - name: Revert with force
+    win_subversion:
+      repo: "{{ test_repo }}"
+      revision: HEAD
+      dest: C:\win_subversion_test\repository-alias
+      username: "{{ svn_username }}"
+      password: "{{ svn_password }}"
+      export: no
+      force: yes
+
+
+  #post_tasks:
+
+  #handlers:
